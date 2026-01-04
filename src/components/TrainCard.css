@@ -1,0 +1,106 @@
+.train-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #2a2a3e;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.train-card.walk-now {
+  background: linear-gradient(135deg, #2a3e2a 0%, #2a2a3e 100%);
+  box-shadow: 0 0 20px rgba(0, 177, 64, 0.3);
+  border: 1px solid #00b140;
+}
+
+.train-card.arriving {
+  background: linear-gradient(135deg, #3e3a2a 0%, #2a2a3e 100%);
+}
+
+.train-card.leaving-soon {
+  opacity: 0.6;
+}
+
+.train-line-indicator {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.train-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.train-destination {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.train-cars {
+  font-size: 0.875rem;
+  color: #a0a0b0;
+}
+
+.train-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.minutes-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.minutes-label {
+  font-size: 0.75rem;
+  color: #a0a0b0;
+  text-transform: uppercase;
+}
+
+.arriving-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffd100;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.walk-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #00b140;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
