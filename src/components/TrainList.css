@@ -18,6 +18,13 @@
   color: #fff;
 }
 
+.status-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
 .last-updated {
   font-size: 0.75rem;
   color: #a0a0b0;
@@ -25,6 +32,11 @@
 
 .updating {
   color: #646cff;
+}
+
+.schedule-status {
+  font-size: 0.7rem;
+  color: #888;
 }
 
 .trains {

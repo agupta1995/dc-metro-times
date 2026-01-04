@@ -4,6 +4,7 @@ import { TrainList } from './components/TrainList'
 import { Settings } from './components/Settings'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useTrainPredictions } from './hooks/useTrainPredictions'
+import { useScheduledTrains } from './hooks/useScheduledTrains'
 import { getStations, groupStationsByName } from './utils/api'
 import './App.css'
 
@@ -29,14 +30,28 @@ const MOCK_STATIONS = [
 
 const MOCK_TRAINS = [
   // Track 1 - Westbound (to Virginia)
-  { Line: 'SV', Destination: 'Ashburn', Min: '3', Car: '8', Group: '1' },
-  { Line: 'OR', Destination: 'Vienna', Min: '7', Car: '6', Group: '1' },
-  { Line: 'SV', Destination: 'Ashburn', Min: '15', Car: '8', Group: '1' },
-  { Line: 'BL', Destination: 'Franconia', Min: '18', Car: '8', Group: '1' },
+  { Line: 'SV', Destination: 'Ashburn', Min: '3', Car: '8', Group: '1', type: 'live' },
+  { Line: 'OR', Destination: 'Vienna', Min: '7', Car: '6', Group: '1', type: 'live' },
+  { Line: 'SV', Destination: 'Ashburn', Min: '15', Car: '8', Group: '1', type: 'live' },
+  { Line: 'BL', Destination: 'Franconia', Min: '18', Car: '8', Group: '1', type: 'live' },
   // Track 2 - Eastbound (to Maryland)
-  { Line: 'SV', Destination: 'Downtown Largo', Min: '2', Car: '6', Group: '2' },
-  { Line: 'BL', Destination: 'New Carrollton', Min: '8', Car: '8', Group: '2' },
-  { Line: 'OR', Destination: 'New Carrollton', Min: 'ARR', Car: '6', Group: '2' },
+  { Line: 'SV', Destination: 'Downtown Largo', Min: '2', Car: '6', Group: '2', type: 'live' },
+  { Line: 'BL', Destination: 'New Carrollton', Min: '8', Car: '8', Group: '2', type: 'live' },
+  { Line: 'OR', Destination: 'New Carrollton', Min: 'ARR', Car: '6', Group: '2', type: 'live' },
+]
+
+// Mock scheduled trains for demo mode
+const MOCK_SCHEDULED_TRAINS = [
+  // Track 1 - Westbound scheduled trains (further out)
+  { Line: 'SV', Destination: 'Ashburn', Min: '35', scheduledTime: '2:45 PM', minutesAway: 35, Car: null, Group: '1', type: 'scheduled' },
+  { Line: 'OR', Destination: 'Vienna', Min: '50', scheduledTime: '3:00 PM', minutesAway: 50, Car: null, Group: '1', type: 'scheduled' },
+  { Line: 'BL', Destination: 'Franconia', Min: '65', scheduledTime: '3:15 PM', minutesAway: 65, Car: null, Group: '1', type: 'scheduled' },
+  { Line: 'SV', Destination: 'Ashburn', Min: '80', scheduledTime: '3:30 PM', minutesAway: 80, Car: null, Group: '1', type: 'scheduled' },
+  // Track 2 - Eastbound scheduled trains
+  { Line: 'SV', Destination: 'Downtown Largo', Min: '25', scheduledTime: '2:35 PM', minutesAway: 25, Car: null, Group: '2', type: 'scheduled' },
+  { Line: 'BL', Destination: 'New Carrollton', Min: '40', scheduledTime: '2:50 PM', minutesAway: 40, Car: null, Group: '2', type: 'scheduled' },
+  { Line: 'OR', Destination: 'New Carrollton', Min: '55', scheduledTime: '3:05 PM', minutesAway: 55, Car: null, Group: '2', type: 'scheduled' },
+  { Line: 'SV', Destination: 'Downtown Largo', Min: '70', scheduledTime: '3:20 PM', minutesAway: 70, Car: null, Group: '2', type: 'scheduled' },
 ]
 
 function App() {
@@ -49,6 +64,7 @@ function App() {
     track: null
   })
   const [walkTime, setWalkTime] = useLocalStorage('metro_walk_time', 15)
+  const [timeWindow, setTimeWindow] = useLocalStorage('metro_time_window', 60)
 
   const [selectedStation, setSelectedStation] = useState(defaults.station)
   const [selectedLines, setSelectedLines] = useState(defaults.lines || [])
@@ -74,9 +90,18 @@ function App() {
     refresh
   } = useTrainPredictions(demoMode ? null : selectedStation)
 
+  // Scheduled trains hook (disabled in demo mode)
+  const {
+    scheduledTrains: realScheduledTrains,
+    loading: scheduledLoading,
+    gtfsLoading
+  } = useScheduledTrains(demoMode ? null : selectedStation, timeWindow)
+
   // Use mock or real data
   const trains = demoMode ? MOCK_TRAINS : realTrains
+  const scheduledTrains = demoMode ? MOCK_SCHEDULED_TRAINS.filter(t => t.minutesAway <= timeWindow) : realScheduledTrains
   const displayLoading = demoMode ? false : loading
+  const displayScheduledLoading = demoMode ? false : (scheduledLoading || gtfsLoading)
   const displayError = demoMode ? null : error
   const displayLastUpdated = demoMode ? new Date() : lastUpdated
 
@@ -116,6 +141,8 @@ function App() {
         <Settings
           walkTime={walkTime}
           onWalkTimeChange={setWalkTime}
+          timeWindow={timeWindow}
+          onTimeWindowChange={setTimeWindow}
           onClearDefaults={handleClearDefaults}
           savedDefaults={defaults}
           stations={stations}
@@ -167,12 +194,15 @@ function App() {
 
         <TrainList
           trains={trains}
+          scheduledTrains={scheduledTrains}
           loading={displayLoading}
+          scheduledLoading={displayScheduledLoading}
           error={displayError}
           lastUpdated={displayLastUpdated}
           selectedLines={selectedLines}
           selectedTrack={selectedTrack}
           walkTime={walkTime}
+          timeWindow={timeWindow}
           onRefresh={refresh}
         />
       </main>

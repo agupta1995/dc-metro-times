@@ -95,6 +95,35 @@
   font-size: 0.875rem;
 }
 
+.time-window-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.time-window-button {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #3a3a4e;
+  border-radius: 8px;
+  background: #1a1a2e;
+  color: #a0a0b0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-window-button:hover {
+  border-color: #646cff;
+  color: #fff;
+}
+
+.time-window-button.active {
+  background: #646cff;
+  border-color: #646cff;
+  color: #fff;
+}
+
 .button-row {
   display: flex;
   gap: 0.5rem;
@@ -171,4 +200,50 @@
 .clear-defaults-button:hover {
   background: #ff6b6b;
   color: #fff;
+}
+
+/* Schedule data section */
+.schedule-info {
+  margin-bottom: 1rem;
+}
+
+.schedule-timestamp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #1a1a2e;
+  border-radius: 8px;
+}
+
+.schedule-label {
+  font-size: 0.875rem;
+  color: #a0a0b0;
+}
+
+.schedule-value {
+  font-weight: 500;
+  color: #fff;
+}
+
+.reload-schedule-button {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  background: transparent;
+  color: #646cff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reload-schedule-button:hover:not(:disabled) {
+  background: #646cff;
+  color: #fff;
+}
+
+.reload-schedule-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

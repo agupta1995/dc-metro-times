@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LINE_NAMES } from '../utils/api'
+import { clearGTFSCache, getGTFSLastUpdated, loadGTFSData } from '../utils/gtfs'
 import './Settings.css'
 
 export function Settings({
   walkTime,
   onWalkTimeChange,
+  timeWindow,
+  onTimeWindowChange,
   onClearDefaults,
   savedDefaults,
   stations,
@@ -12,6 +15,38 @@ export function Settings({
 }) {
   const [apiKey, setApiKey] = useState(localStorage.getItem('wmata_api_key') || '')
   const [saved, setSaved] = useState(false)
+  const [gtfsLastUpdated, setGtfsLastUpdated] = useState(null)
+  const [gtfsReloading, setGtfsReloading] = useState(false)
+
+  // Load GTFS last updated timestamp on mount
+  useEffect(() => {
+    getGTFSLastUpdated().then(setGtfsLastUpdated)
+  }, [])
+
+  const handleReloadSchedule = async () => {
+    setGtfsReloading(true)
+    try {
+      await clearGTFSCache()
+      await loadGTFSData()
+      const updated = await getGTFSLastUpdated()
+      setGtfsLastUpdated(updated)
+    } catch (err) {
+      console.error('Failed to reload GTFS:', err)
+    } finally {
+      setGtfsReloading(false)
+    }
+  }
+
+  const formatLastUpdated = (date) => {
+    if (!date) return 'Never'
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+  }
 
   const handleSaveApiKey = () => {
     localStorage.setItem('wmata_api_key', apiKey)
@@ -96,6 +131,46 @@ export function Settings({
             />
             <span className="walk-time-unit">minutes</span>
           </div>
+        </div>
+
+        {/* Time Window Section */}
+        <div className="settings-section">
+          <h3>Schedule Window</h3>
+          <p className="settings-help">
+            Show trains up to this many minutes ahead (includes scheduled trains)
+          </p>
+          <div className="time-window-buttons">
+            {[30, 60, 90].map(mins => (
+              <button
+                key={mins}
+                className={`time-window-button ${timeWindow === mins ? 'active' : ''}`}
+                onClick={() => onTimeWindowChange(mins)}
+              >
+                {mins} min
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Schedule Data Section */}
+        <div className="settings-section">
+          <h3>Schedule Data</h3>
+          <p className="settings-help">
+            GTFS schedule data for showing trains beyond live predictions
+          </p>
+          <div className="schedule-info">
+            <div className="schedule-timestamp">
+              <span className="schedule-label">Last updated:</span>
+              <span className="schedule-value">{formatLastUpdated(gtfsLastUpdated)}</span>
+            </div>
+          </div>
+          <button
+            className="reload-schedule-button"
+            onClick={handleReloadSchedule}
+            disabled={gtfsReloading}
+          >
+            {gtfsReloading ? 'Reloading...' : 'Reload Schedule Data'}
+          </button>
         </div>
 
         {/* Saved Defaults Section */}

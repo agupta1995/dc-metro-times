@@ -75,6 +75,12 @@
   text-transform: uppercase;
 }
 
+.arrival-time {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+}
+
 .arriving-text {
   font-size: 1.25rem;
   font-weight: 700;
@@ -103,4 +109,48 @@
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+
+/* Scheduled train styling */
+.train-card.scheduled {
+  background: #232335;
+  border: 1px dashed #3a3a4e;
+  opacity: 0.85;
+}
+
+.train-card.scheduled .train-destination {
+  color: #c0c0d0;
+}
+
+.train-card.scheduled .minutes-value {
+  color: #a0a0b0;
+}
+
+/* Badge styles */
+.scheduled-badge,
+.live-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scheduled-badge {
+  background: #3a3a4e;
+  color: #a0a0b0;
+}
+
+.live-badge {
+  background: #00b140;
+  color: #fff;
+}
+
+/* Hide live badge when walk-now is active (they overlap) */
+.train-card.walk-now .live-badge {
+  display: none;
 }

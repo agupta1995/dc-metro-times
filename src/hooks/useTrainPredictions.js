@@ -18,7 +18,8 @@ export function useTrainPredictions(stationCode, refreshInterval = 30000) {
 
     try {
       const data = await getPredictions(stationCode)
-      setTrains(data)
+      // Add type: 'live' to distinguish from scheduled trains
+      setTrains(data.map(train => ({ ...train, type: 'live' })))
       setLastUpdated(new Date())
     } catch (err) {
       setError(err.message)
