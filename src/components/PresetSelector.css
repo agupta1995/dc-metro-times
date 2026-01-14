@@ -1,0 +1,68 @@
+.preset-selector {
+  padding: 0.75rem 1rem;
+  background: #2a2a3e;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.preset-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.preset-chips::-webkit-scrollbar {
+  height: 4px;
+}
+
+.preset-chips::-webkit-scrollbar-track {
+  background: #1a1a2e;
+  border-radius: 2px;
+}
+
+.preset-chips::-webkit-scrollbar-thumb {
+  background: #3a3a4e;
+  border-radius: 2px;
+}
+
+.preset-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #3a3a4e;
+  border-radius: 20px;
+  background: #1a1a2e;
+  color: #a0a0b0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.preset-chip:hover {
+  border-color: #646cff;
+  color: #fff;
+}
+
+.preset-chip.active {
+  background: #646cff;
+  border-color: #646cff;
+  color: #fff;
+}
+
+.preset-check {
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.preset-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

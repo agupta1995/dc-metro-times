@@ -247,3 +247,159 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Presets section */
+.no-presets {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.presets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.preset-card {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.preset-info {
+  margin-bottom: 0.75rem;
+}
+
+.preset-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.preset-details {
+  font-size: 0.8125rem;
+  color: #a0a0b0;
+  margin-bottom: 0.25rem;
+}
+
+.preset-walk-time {
+  font-size: 0.8125rem;
+  color: #666;
+}
+
+.preset-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preset-edit-btn,
+.preset-delete-btn {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-edit-btn {
+  border: 1px solid #646cff;
+  background: transparent;
+  color: #646cff;
+}
+
+.preset-edit-btn:hover {
+  background: #646cff;
+  color: #fff;
+}
+
+.preset-delete-btn {
+  border: 1px solid #ff6b6b;
+  background: transparent;
+  color: #ff6b6b;
+}
+
+.preset-delete-btn:hover {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+/* Preset edit form */
+.preset-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.edit-field label {
+  font-size: 0.8125rem;
+  color: #a0a0b0;
+}
+
+.edit-field input {
+  padding: 0.625rem;
+  font-size: 0.875rem;
+}
+
+.walk-time-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.walk-time-edit input {
+  width: 70px;
+}
+
+.walk-time-edit span {
+  color: #a0a0b0;
+  font-size: 0.875rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.edit-save-btn,
+.edit-cancel-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-save-btn {
+  border: none;
+  background: #00b140;
+  color: #fff;
+}
+
+.edit-save-btn:hover {
+  background: #00963a;
+}
+
+.edit-cancel-btn {
+  border: 1px solid #3a3a4e;
+  background: transparent;
+  color: #a0a0b0;
+}
+
+.edit-cancel-btn:hover {
+  border-color: #646cff;
+  color: #fff;
+}

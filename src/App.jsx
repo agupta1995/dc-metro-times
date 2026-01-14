@@ -2,10 +2,20 @@ import { useState, useEffect, useCallback } from 'react'
 import { StationSelector } from './components/StationSelector'
 import { TrainList } from './components/TrainList'
 import { Settings } from './components/Settings'
+import { PresetSelector } from './components/PresetSelector'
+import { SavePresetModal } from './components/SavePresetModal'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useTrainPredictions } from './hooks/useTrainPredictions'
 import { useScheduledTrains } from './hooks/useScheduledTrains'
 import { getStations, groupStationsByName } from './utils/api'
+import {
+  loadPresets,
+  savePresets,
+  loadActivePresetId,
+  saveActivePresetId,
+  createPreset,
+  getPresetById
+} from './utils/presets'
 import './App.css'
 
 // Mock data for testing UI without API key
@@ -58,17 +68,21 @@ function App() {
   const [demoMode, setDemoMode] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [stations, setStations] = useState([])
-  const [defaults, setDefaults] = useLocalStorage('metro_defaults', {
-    station: null,
-    lines: [],
-    track: null
-  })
-  const [walkTime, setWalkTime] = useLocalStorage('metro_walk_time', 15)
+
+  // Presets state
+  const [presets, setPresets] = useState(() => loadPresets())
+  const [activePresetId, setActivePresetId] = useState(() => loadActivePresetId())
+  const [showSaveModal, setShowSaveModal] = useState(false)
+
+  // Get the active preset (if any) for initial values
+  const activePreset = getPresetById(presets, activePresetId)
+
+  const [walkTime, setWalkTime] = useLocalStorage('metro_walk_time', activePreset?.walkTime || 15)
   const [timeWindow, setTimeWindow] = useLocalStorage('metro_time_window', 60)
 
-  const [selectedStation, setSelectedStation] = useState(defaults.station)
-  const [selectedLines, setSelectedLines] = useState(defaults.lines || [])
-  const [selectedTrack, setSelectedTrack] = useState(defaults.track)
+  const [selectedStation, setSelectedStation] = useState(activePreset?.station || null)
+  const [selectedLines, setSelectedLines] = useState(activePreset?.lines || [])
+  const [selectedTrack, setSelectedTrack] = useState(activePreset?.track || null)
 
   // Load stations for Settings page display
   useEffect(() => {
@@ -105,20 +119,76 @@ function App() {
   const displayError = demoMode ? null : error
   const displayLastUpdated = demoMode ? new Date() : lastUpdated
 
-  const handleSaveDefaults = () => {
-    setDefaults({
-      station: selectedStation,
-      lines: selectedLines,
-      track: selectedTrack
-    })
+  // Select a preset and apply its settings
+  const handleSelectPreset = (presetId) => {
+    const preset = getPresetById(presets, presetId)
+    if (preset) {
+      setActivePresetId(presetId)
+      saveActivePresetId(presetId)
+      setSelectedStation(preset.station)
+      setSelectedLines(preset.lines || [])
+      setSelectedTrack(preset.track)
+      setWalkTime(preset.walkTime || 15)
+    }
   }
 
-  const handleClearDefaults = () => {
-    setDefaults({ station: null, lines: [], track: null })
+  // Save a new preset or update existing one
+  const handleSavePreset = ({ name, walkTime: presetWalkTime }) => {
+    const newPreset = createPreset(
+      name,
+      selectedStation,
+      selectedTrack,
+      selectedLines,
+      presetWalkTime
+    )
+    const updatedPresets = [...presets, newPreset]
+    setPresets(updatedPresets)
+    savePresets(updatedPresets)
+    setActivePresetId(newPreset.id)
+    saveActivePresetId(newPreset.id)
+    setWalkTime(presetWalkTime)
+  }
+
+  // Update an existing preset
+  const handleUpdatePreset = (presetId, updates) => {
+    const updatedPresets = presets.map(p =>
+      p.id === presetId ? { ...p, ...updates } : p
+    )
+    setPresets(updatedPresets)
+    savePresets(updatedPresets)
+    // If updating the active preset's walkTime, update the current walkTime too
+    if (presetId === activePresetId && updates.walkTime !== undefined) {
+      setWalkTime(updates.walkTime)
+    }
+  }
+
+  // Delete a preset
+  const handleDeletePreset = (presetId) => {
+    const updatedPresets = presets.filter(p => p.id !== presetId)
+    setPresets(updatedPresets)
+    savePresets(updatedPresets)
+    // If deleted the active preset, clear the active preset
+    if (presetId === activePresetId) {
+      setActivePresetId(null)
+      saveActivePresetId(null)
+    }
+  }
+
+  // Clear all presets and settings
+  const handleClearAllData = () => {
+    setPresets([])
+    savePresets([])
+    setActivePresetId(null)
+    saveActivePresetId(null)
     setSelectedStation(null)
     setSelectedLines([])
     setSelectedTrack(null)
     localStorage.removeItem('wmata_api_key')
+  }
+
+  // Open the save preset modal
+  const handleOpenSaveModal = () => {
+    setShowSaveModal(true)
   }
 
   // Memoize the lines change handler to prevent infinite loops
@@ -143,8 +213,10 @@ function App() {
           onWalkTimeChange={setWalkTime}
           timeWindow={timeWindow}
           onTimeWindowChange={setTimeWindow}
-          onClearDefaults={handleClearDefaults}
-          savedDefaults={defaults}
+          presets={presets}
+          onUpdatePreset={handleUpdatePreset}
+          onDeletePreset={handleDeletePreset}
+          onClearAllData={handleClearAllData}
           stations={stations}
           onClose={() => setShowSettings(false)}
         />
@@ -180,6 +252,12 @@ function App() {
       )}
 
       <main className="app-main">
+        <PresetSelector
+          presets={presets}
+          activePresetId={activePresetId}
+          onSelectPreset={handleSelectPreset}
+        />
+
         <StationSelector
           selectedStation={selectedStation}
           selectedLines={selectedLines}
@@ -187,9 +265,16 @@ function App() {
           onStationChange={setSelectedStation}
           onLinesChange={handleLinesChange}
           onTrackChange={setSelectedTrack}
-          onSaveDefaults={handleSaveDefaults}
+          onSavePreset={handleOpenSaveModal}
           demoMode={demoMode}
           mockStations={MOCK_STATIONS}
+        />
+
+        <SavePresetModal
+          isOpen={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          onSave={handleSavePreset}
+          initialWalkTime={walkTime}
         />
 
         <TrainList

@@ -11,7 +11,7 @@ export function StationSelector({
   onStationChange,
   onLinesChange,
   onTrackChange,
-  onSaveDefaults,
+  onSavePreset,
   demoMode = false,
   mockStations = []
 }) {
@@ -160,8 +160,8 @@ export function StationSelector({
       )}
 
       {selectedStation && (
-        <button className="save-defaults-button" onClick={onSaveDefaults}>
-          Save as Default
+        <button className="save-defaults-button" onClick={onSavePreset}>
+          Save as Preset
         </button>
       )}
     </div>

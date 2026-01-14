@@ -8,8 +8,10 @@ export function Settings({
   onWalkTimeChange,
   timeWindow,
   onTimeWindowChange,
-  onClearDefaults,
-  savedDefaults,
+  presets,
+  onUpdatePreset,
+  onDeletePreset,
+  onClearAllData,
   stations,
   onClose
 }) {
@@ -17,6 +19,9 @@ export function Settings({
   const [saved, setSaved] = useState(false)
   const [gtfsLastUpdated, setGtfsLastUpdated] = useState(null)
   const [gtfsReloading, setGtfsReloading] = useState(false)
+  const [editingPresetId, setEditingPresetId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editWalkTime, setEditWalkTime] = useState(15)
 
   // Load GTFS last updated timestamp on mount
   useEffect(() => {
@@ -76,6 +81,36 @@ export function Settings({
   const formatTrack = (track) => {
     if (!track) return 'All'
     return `Track ${track}`
+  }
+
+  // Start editing a preset
+  const startEditingPreset = (preset) => {
+    setEditingPresetId(preset.id)
+    setEditName(preset.name)
+    setEditWalkTime(preset.walkTime || 15)
+  }
+
+  // Save preset edits
+  const savePresetEdit = () => {
+    if (editingPresetId && editName.trim()) {
+      onUpdatePreset(editingPresetId, {
+        name: editName.trim(),
+        walkTime: parseInt(editWalkTime, 10) || 15
+      })
+      setEditingPresetId(null)
+    }
+  }
+
+  // Cancel editing
+  const cancelEdit = () => {
+    setEditingPresetId(null)
+  }
+
+  // Confirm delete
+  const confirmDelete = (presetId, presetName) => {
+    if (window.confirm(`Delete "${presetName}"?`)) {
+      onDeletePreset(presetId)
+    }
   }
 
   return (
@@ -173,29 +208,71 @@ export function Settings({
           </button>
         </div>
 
-        {/* Saved Defaults Section */}
+        {/* Saved Presets Section */}
         <div className="settings-section">
-          <h3>Saved Defaults</h3>
+          <h3>Saved Presets</h3>
           <p className="settings-help">
-            These settings are loaded when you open the app
+            Switch between presets on the home screen
           </p>
-          <div className="defaults-display">
-            <div className="default-item">
-              <span className="default-label">Station</span>
-              <span className="default-value">{getStationName(savedDefaults?.station)}</span>
+          {presets.length === 0 ? (
+            <p className="no-presets">No presets saved yet. Select a station and tap "Save as Preset".</p>
+          ) : (
+            <div className="presets-list">
+              {presets.map(preset => (
+                <div key={preset.id} className="preset-card">
+                  {editingPresetId === preset.id ? (
+                    <div className="preset-edit-form">
+                      <div className="edit-field">
+                        <label>Name</label>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          maxLength={30}
+                        />
+                      </div>
+                      <div className="edit-field">
+                        <label>Walk Time</label>
+                        <div className="walk-time-edit">
+                          <input
+                            type="number"
+                            value={editWalkTime}
+                            onChange={(e) => setEditWalkTime(e.target.value)}
+                            min="1"
+                            max="60"
+                          />
+                          <span>min</span>
+                        </div>
+                      </div>
+                      <div className="edit-actions">
+                        <button className="edit-save-btn" onClick={savePresetEdit}>Save</button>
+                        <button className="edit-cancel-btn" onClick={cancelEdit}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="preset-info">
+                        <div className="preset-name">{preset.name}</div>
+                        <div className="preset-details">
+                          {getStationName(preset.station)} &bull; {formatTrack(preset.track)} &bull; {formatLines(preset.lines)}
+                        </div>
+                        <div className="preset-walk-time">Walk time: {preset.walkTime || 15} min</div>
+                      </div>
+                      <div className="preset-actions">
+                        <button className="preset-edit-btn" onClick={() => startEditingPreset(preset)}>Edit</button>
+                        <button className="preset-delete-btn" onClick={() => confirmDelete(preset.id, preset.name)}>Delete</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-            <div className="default-item">
-              <span className="default-label">Track</span>
-              <span className="default-value">{formatTrack(savedDefaults?.track)}</span>
-            </div>
-            <div className="default-item">
-              <span className="default-label">Lines</span>
-              <span className="default-value">{formatLines(savedDefaults?.lines)}</span>
-            </div>
-          </div>
-          <button className="clear-defaults-button" onClick={onClearDefaults}>
-            Clear All Defaults
-          </button>
+          )}
+          {presets.length > 0 && (
+            <button className="clear-defaults-button" onClick={onClearAllData}>
+              Clear All Data
+            </button>
+          )}
         </div>
       </div>
     </div>
